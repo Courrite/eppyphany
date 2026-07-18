@@ -1,4 +1,5 @@
 #include "Difficulty/ManiaDifficultyCalculator.hpp"
+#include "Difficulty/Preprocessing/DifficultyHitObject.hpp"
 #include "Difficulty/Preprocessing/ManiaDifficultyHitObject.hpp"
 #include "Difficulty/Skills/Strain.hpp"
 #include <algorithm>
@@ -35,10 +36,7 @@ namespace eppyphany::Difficulty {
 
     std::vector<std::unique_ptr<DifficultyHitObject>> ManiaDifficultyCalculator::CreateDifficultyHitObjects(const dotosu& osuFile) {
         auto hitObjects = osuFile.GetHitObjects();
-        
-        if (hitObjects.empty()) {
-            return {};
-        }
+        if (hitObjects.empty()) return {};
 
         std::sort(hitObjects.begin(), hitObjects.end(), [](const auto& a, const auto& b) {
             return std::round(a.HitTime) < std::round(b.HitTime);
@@ -48,12 +46,13 @@ namespace eppyphany::Difficulty {
         objects.reserve(hitObjects.size());
 
         int totalColumns = static_cast<int>(osuFile.Config.Keys);
-
         std::vector<ManiaDifficultyHitObject*> lastObjectInColumn(totalColumns, nullptr);
+        std::unique_ptr<ManiaDifficultyHitObject> lastDiffObj = nullptr;
+    
+        ManiaDifficultyHitObject* prevOverall = nullptr;
 
         for (size_t i = 1; i < hitObjects.size(); ++i) {
             const auto& current = hitObjects[i];
-            const auto& last = hitObjects[i - 1];
 
             int column = static_cast<int>(std::floor(current.X * totalColumns / 512.0));
             column = std::clamp(column, 0, totalColumns - 1);
@@ -62,13 +61,13 @@ namespace eppyphany::Difficulty {
 
             auto maniaObj = std::make_unique<ManiaDifficultyHitObject>(
                 current, 
-                last, 
-                &objects, 
                 prevInColumn, 
+                prevOverall,
                 static_cast<int>(objects.size()),
-                osuFile.Config.Keys
+                totalColumns
             );
-            
+
+            prevOverall = maniaObj.get(); 
             lastObjectInColumn[column] = maniaObj.get();
             objects.push_back(std::move(maniaObj));
         }

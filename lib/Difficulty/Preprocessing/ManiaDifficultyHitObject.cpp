@@ -8,15 +8,16 @@ using namespace eppyphany::Generation;
 
 namespace eppyphany::Difficulty {
         ManiaDifficultyHitObject::ManiaDifficultyHitObject(
-        const eppyphany::Generation::HitObject& hitObject,
-        const eppyphany::Generation::HitObject& lastObject,
-        const std::vector<std::unique_ptr<DifficultyHitObject>>* objects,
+        const HitObject& hitObject,
         ManiaDifficultyHitObject* prevInColumn,
+        ManiaDifficultyHitObject* prevOverall,
         int index,
         int columnCount
-    ) : DifficultyHitObject(hitObject, lastObject, objects, index) 
+    ) : DifficultyHitObject(hitObject, prevOverall, index) 
     {
         this->Column = hitObject.Column; 
+
+        this->ColumnDelta = prevOverall != nullptr ? hitObject.HitTime - prevOverall->Start : 0;
 
         this->PreviousHitObjects.resize(columnCount, nullptr);
         
@@ -28,13 +29,10 @@ namespace eppyphany::Difficulty {
         this->ColumnStrainTime = prevInColumn ? (this->Start - prevInColumn->Start) : this->Start;
 
         if (index > 0) {
-            auto* prevNote = static_cast<ManiaDifficultyHitObject*>((*objects)[index - 1].get());
-            
-            this->PreviousHitObjects.resize(prevNote->PreviousHitObjects.size(), nullptr);
-            for (size_t i = 0; i < prevNote->PreviousHitObjects.size(); ++i) {
-                this->PreviousHitObjects[i] = prevNote->PreviousHitObjects[i];
+            if (prevOverall) {
+                this->PreviousHitObjects = prevOverall->PreviousHitObjects;
+                this->PreviousHitObjects[prevOverall->Column] = prevOverall;
             }
-            this->PreviousHitObjects[prevNote->Column] = prevNote;
         }
     }
 

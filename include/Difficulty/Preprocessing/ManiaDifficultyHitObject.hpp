@@ -3,7 +3,6 @@
 #include "Difficulty/Preprocessing/DifficultyHitObject.hpp"
 #include "Generation/Objects.hpp"
 #include <vector>
-#include <memory>
 
 using namespace eppyphany::Generation;
 
@@ -14,17 +13,17 @@ namespace eppyphany::Difficulty {
             
             int Column;
             double ColumnStrainTime;
+            double ColumnDelta;
 
             ManiaDifficultyHitObject* ImmediatePrevInColumn = nullptr;
             ManiaDifficultyHitObject* ImmediateNextInColumn = nullptr;
         
-            std::vector<ManiaDifficultyHitObject*> PreviousHitObjects;
+            std::vector<const ManiaDifficultyHitObject*> PreviousHitObjects;
 
             ManiaDifficultyHitObject(
                 const HitObject& hitObject,
-                const HitObject& lastObject,
-                const std::vector<std::unique_ptr<DifficultyHitObject>>* objects,
-                ManiaDifficultyHitObject* prevInCOlumn,
+                ManiaDifficultyHitObject* prevInColumn,
+                ManiaDifficultyHitObject* prevOverall,
                 int index,
                 int columnCount
             );

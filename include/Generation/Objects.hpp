@@ -45,4 +45,21 @@ namespace eppyphany::Generation {
         int Uninherited; // 1 = uninherited (BPM change), 0 = inherited (SV change)
         int Effects;
     };
+    
+    struct GeneratorConfig {
+        unsigned int Keys = 4;
+        float TargetStarRating = 5.0f;
+        unsigned int RandomSeed = 0;
+    };
+
+    struct PlacedNote {
+        int Column;
+        int HitTimeMs;
+        int ReleaseTimeMs = -1;
+    };
+
+    struct KiaiSection {
+        int StartMs;
+        int EndMs;
+    };
 }

@@ -1,27 +1,24 @@
 #pragma once
 
 #include "Generation/Objects.hpp"
-#include <vector>
 
 using namespace eppyphany::Generation;
 
 namespace eppyphany::Difficulty {
     class DifficultyHitObject {
         public:
+            virtual ~DifficultyHitObject() = default;
+
             int Index;
             HitObject BaseObject;
-            HitObject LastObject;
+            const DifficultyHitObject* LastObject;
             double Delta;
             double Start;
             double End;
 
-        private:
-            const std::vector<std::unique_ptr<DifficultyHitObject>>* difficultyHitObjects_;
-
         public:
-            DifficultyHitObject(const HitObject& baseObject, const HitObject& lastObject, const std::vector<std::unique_ptr<DifficultyHitObject>>* hitObjects, int idx);
+            DifficultyHitObject(const HitObject& baseObject, const DifficultyHitObject* lastObject, int idx);
 
             const DifficultyHitObject* Previous() const;
-            const DifficultyHitObject* Next() const;
     };
 }

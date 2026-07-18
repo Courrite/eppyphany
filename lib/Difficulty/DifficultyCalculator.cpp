@@ -40,20 +40,24 @@ namespace eppyphany::Difficulty {
     }
 
     std::vector<std::unique_ptr<DifficultyHitObject>> DifficultyCalculator::CreateDifficultyHitObjects(const dotosu& osuFile) {
-        std::vector<std::unique_ptr<DifficultyHitObject>> difficultyObjects;
-        const auto& hitObjects = osuFile.GetHitObjects();
+        auto hitObjects = osuFile.GetHitObjects();
+        std::vector<std::unique_ptr<DifficultyHitObject>> objects;
+        objects.reserve(hitObjects.size());
 
-        difficultyObjects.reserve(hitObjects.size());
+        DifficultyHitObject* last = nullptr; 
 
         for (size_t i = 0; i < hitObjects.size(); ++i) {
-            const auto& current = hitObjects[i];
-            const auto& last = (i > 0) ? hitObjects[i - 1] : current;
-            
-            difficultyObjects.push_back(
-                std::make_unique<DifficultyHitObject>(current, last, &difficultyObjects, static_cast<int>(i))
+            auto newObj = std::make_unique<DifficultyHitObject>(
+                hitObjects[i], 
+                last,
+                static_cast<int>(i)
             );
+
+            last = newObj.get(); 
+        
+            objects.push_back(std::move(newObj));
         }
 
-        return difficultyObjects;
+        return objects;
     }
 }
