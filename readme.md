@@ -1,0 +1,1 @@
+This is a map generator for osu!mania.
