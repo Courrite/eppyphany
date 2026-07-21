@@ -14,10 +14,11 @@ namespace eppyphany::Difficulty {
     double Strain::StrainValueOf(const DifficultyHitObject& current) {
         auto maniaCurrent = static_cast<const ManiaDifficultyHitObject&>(current);
 
-        individualStrains[maniaCurrent.Column] = _applyDecay(individualStrains[maniaCurrent.Column], maniaCurrent.ColumnDelta, INDIVIDUAL_DECAY_BASE);
-        individualStrains[maniaCurrent.Column] += IndividualStrainEvaluator::EvaluateDifficultyOf(maniaCurrent);
+        int colIdx = maniaCurrent.Column - 1;
+        individualStrains[colIdx] = _applyDecay(individualStrains[colIdx], maniaCurrent.ColumnDelta, INDIVIDUAL_DECAY_BASE);
+        individualStrains[colIdx] += IndividualStrainEvaluator::EvaluateDifficultyOf(maniaCurrent);
 
-        highestIndividualStrain = maniaCurrent.ColumnDelta <= 1 ? std::max(highestIndividualStrain, individualStrains[maniaCurrent.Column]) : individualStrains[maniaCurrent.Column];
+        highestIndividualStrain = maniaCurrent.ColumnDelta <= 1 ? std::max(highestIndividualStrain, individualStrains[colIdx]) : individualStrains[colIdx];
 
         overallStrain = _applyDecay(overallStrain, maniaCurrent.Delta, OVERALL_DECAY_BASE);
         overallStrain += OverallStrainEvaluator::EvaluateDifficultyOf(maniaCurrent);

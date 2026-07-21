@@ -1,5 +1,4 @@
 #include "Difficulty/Preprocessing/DifficultyHitObject.hpp"
-#include "Generation/Objects.hpp"
 
 using namespace eppyphany::Generation;
 
@@ -13,7 +12,7 @@ namespace eppyphany::Difficulty {
         Index(idx) 
     {
         Start = baseObject.HitTime;
-        End = (baseObject.ReleaseTime != -1) ? baseObject.ReleaseTime : baseObject.HitTime;
+        End = baseObject.ReleaseTime > baseObject.HitTime ? baseObject.ReleaseTime : baseObject.HitTime;
         Delta = lastObject != nullptr ? Start - lastObject->Start : 0;
     }
 

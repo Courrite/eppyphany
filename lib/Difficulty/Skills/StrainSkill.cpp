@@ -1,9 +1,12 @@
 #include "Difficulty/Skills/StrainSkill.hpp"
 #include "Difficulty/Preprocessing/DifficultyHitObject.hpp"
 #include <algorithm>
-#include <libavutil/log.h>
 #include <vector>
 #include <cmath>
+
+extern "C" {
+    #include <libavutil/log.h>
+}
 
 namespace eppyphany::Difficulty {
     double StrainSkill::DifficultyValue() {
@@ -21,7 +24,7 @@ namespace eppyphany::Difficulty {
 
         for (double strain : filtered) {
             difficulty += strain * weight;
-            weight *= _decayWeight;
+            weight *= DECAY_WEIGHT;
         }
 
         return difficulty;
@@ -29,12 +32,12 @@ namespace eppyphany::Difficulty {
 
     double StrainSkill::ProcessInternal(DifficultyHitObject& current) {
         if (current.Index == 0)
-            _currentSectionEnd = std::ceil(current.Start / _sectionLength) * _sectionLength;
+            _currentSectionEnd = std::ceil(current.Start / SECTION_LENGTH) * SECTION_LENGTH;
 
         while (current.Start > _currentSectionEnd) {
             _saveCurrentPeak();
             _startNewSectionFrom(_currentSectionEnd, current);
-            _currentSectionEnd += _sectionLength;
+            _currentSectionEnd += SECTION_LENGTH;
         }
 
         double strain = StrainValueAt(current);

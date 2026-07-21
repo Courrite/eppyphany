@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Generation/Objects.hpp"
+#include "Generation/dotosu.hpp"
 
 using namespace eppyphany::Generation;
 

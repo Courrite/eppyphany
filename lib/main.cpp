@@ -1,13 +1,15 @@
+#include "DSP/Analyzer.hpp"
+#include "DSP/AudioLoader.hpp"
 #include "Difficulty/ManiaDifficultyCalculator.hpp"
 #include "Generation/dotosu.hpp"
-#include "Generation/DSProcessor.hpp"
-#include "Generation/PatternLibrary.hpp"
+#include "Generation/Composer.hpp"
 #include <filesystem>
 #include <iostream>
 #include <string>
 
 using namespace eppyphany::Generation;
 using namespace eppyphany::Difficulty;
+using namespace eppyphany::DSP;
 
 int main() {
     std::string name;
@@ -19,9 +21,9 @@ int main() {
     unsigned int keys = 4;
     unsigned int bpm = 120;
 
-    float hpDrain = 5.0f;
-    float accuracy = 5.0f;
-    float proposedSr = 0.0f;
+    double hpDrain = 5.0;
+    double accuracy = 5.0;
+    double proposedSr = 0.0;
 
     std::string temp;
 
@@ -69,18 +71,15 @@ int main() {
     std::cout << "\nStarting audio analysis...\n";
     
     // make the processor jump halfway into the window to prevent blurry timing (~11.6ms resolution at 44.1kHz)
-    DSProcessor processor(1024, 512);
+    Analyzer analyzer(1024, 512);
     
-    if (!processor.LoadAudio(audioFile)) {
-        std::cerr << "Failed to read or decode audio source file. Aborting generation.\n";
-        return 1;
-    }
+    auto decoded = AudioLoader::LoadAudio(audioFile);
 
-    std::vector<AudioFrame> analysisTimeline = processor.Analyze();
+    std::vector<AudioFrame> analysisTimeline = analyzer.Analyze(decoded);
     std::cout << "Analysis completed. Generated " << analysisTimeline.size() << " spectrum frames.\n";
 
     // map configuration
-    dotosuFileConfig config{
+    MapConfig config{
         .Name = name,
         .Author = author,
         .Creator = creator,
@@ -109,20 +108,11 @@ int main() {
 
     generatedFile.AddTimingPoint(startPoint);
 
-    // note generation
-    GeneratorConfig genConfig{
-        .Keys = keys,
-        // a proposed star rating of 0.0 means the user skipped the prompt,
-        // default to 3.5* target because (i think), its the average for
-        // the vast majority of casual osu!mania players.
-        .TargetStarRating = proposedSr > 0.0f ? proposedSr : 3.5f,
-    };
-
-    PatternLibrary library(genConfig);
-    std::vector<PlacedNote> notes = library.Generate(analysisTimeline);
+    Composer composer;
+    auto notes = composer.Compose(config, decoded);
 
     for (const auto& note : notes) {
-        generatedFile.AddHitObject(note.Column, note.HitTimeMs, note.ReleaseTimeMs);
+        generatedFile.AddHitObject(note.Column, note.HitTime, note.ReleaseTime);
     }
 
     ManiaDifficultyCalculator calc;
@@ -130,7 +120,7 @@ int main() {
 
     std::cout << "Generated " << notes.size() << " notes (estimated ~"
                << sr << "* against a target of "
-               << genConfig.TargetStarRating << "*).\n";
+               << config.StarRating << "*).\n";
 
     std::filesystem::path outPath = std::filesystem::current_path() / "output";
     if (!std::filesystem::exists(outPath)) {

@@ -6,6 +6,9 @@
 namespace eppyphany::Difficulty {
     class Strain : public StrainDecaySkill {
         public:
+            const double INDIVIDUAL_DECAY_BASE = 0.125;
+            const double OVERALL_DECAY_BASE = 0.3;
+
             Strain(int columns);
 
         protected:
@@ -13,12 +16,9 @@ namespace eppyphany::Difficulty {
             double CalculateInitialStrain(double time, const DifficultyHitObject &current) override;
 
         private:
-            const double INDIVIDUAL_DECAY_BASE = 0.125;
-            const double OVERALL_DECAY_BASE = 0.3;
-
             std::vector<double> individualStrains;
             double highestIndividualStrain = 0.0;
-            double overallStrain = 1;
+            double overallStrain = 1.0;
 
             double _applyDecay(double value, double delta, double decayBase);
     };

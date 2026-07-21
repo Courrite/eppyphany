@@ -1,11 +1,10 @@
-#include "Generation/Objects.hpp"
 #include "Generation/dotosu.hpp"
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 
 namespace eppyphany::Generation {
-    dotosu::dotosu(const dotosuFileConfig& _config) 
+    dotosu::dotosu(const MapConfig& _config) 
         : Config(_config),
           MillisecondsPerBeat(60000.0 / (_config.BPM > 0 ? _config.BPM : 120)),
           inputStream_(std::filesystem::current_path() / (_config.Name + ".osu"), std::ios::in)
@@ -29,9 +28,8 @@ namespace eppyphany::Generation {
         hitObjects_.push_back(_hitObject);
     }
 
-    void dotosu::AddHitObject(int columnIndex, int hitTime, int releaseTime) {
+    void dotosu::AddHitObject(int columnIndex, double hitTime, double releaseTime) {
         HitObject obj;
-        obj.X = _calculateLaneX(columnIndex);
         obj.Column = columnIndex;
         obj.HitTime = hitTime;
         obj.ReleaseTime = releaseTime;
@@ -99,7 +97,7 @@ namespace eppyphany::Generation {
         outFile << "DistanceSpacing: 1\n";
         outFile << "BeatDivisor: 8\n";
         outFile << "GridSize: 0\n";
-        outFile << "TimelineZoom: 6.072000503540039\n";
+        outFile << "TimelineZoom: 1.0\n";
         outFile << "VelocityPresets: 0.75,1,1.5\n\n";
 
         outFile << "[Metadata]\n";
@@ -142,10 +140,10 @@ namespace eppyphany::Generation {
         outFile << "[HitObjects]\n";
         for (const auto& obj : hitObjects_) {
             if (obj.Type == HitObjectType::LongNote) {
-                outFile << obj.X << ",192," << obj.HitTime << "," << static_cast<int>(obj.Type) 
+                outFile << _calculateLaneX(obj.Column) << ",192," << obj.HitTime << "," << obj.Type 
                         << ",0," << obj.ReleaseTime << ":1:0:0:100:\n";
             } else {
-                outFile << obj.X << ",192," << obj.HitTime << "," << static_cast<int>(obj.Type) 
+                outFile << _calculateLaneX(obj.Column) << ",192," << obj.HitTime << "," << obj.Type 
                         << ",0,1:0:0:100:\n";
             }
         }

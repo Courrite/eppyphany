@@ -15,7 +15,6 @@ namespace eppyphany::Difficulty {
             double Calculate(const dotosu& osuFile) override;
 
         protected:
-            void SortObjects(std::vector<std::unique_ptr<DifficultyHitObject>>& objects) override;
             std::vector<std::unique_ptr<DifficultyHitObject>> CreateDifficultyHitObjects(const dotosu& osuFile) override;
             std::vector<std::unique_ptr<Skill>> CreateSkills(const dotosu& osuFile) override;
 

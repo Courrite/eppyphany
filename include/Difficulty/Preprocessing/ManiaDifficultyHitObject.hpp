@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Difficulty/Preprocessing/DifficultyHitObject.hpp"
-#include "Generation/Objects.hpp"
 #include <vector>
 
 using namespace eppyphany::Generation;

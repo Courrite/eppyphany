@@ -6,15 +6,15 @@
 namespace eppyphany::Difficulty {
     class StrainSkill : public Skill {
         private:
-            const double _decayWeight = 0.9;
-            const int _sectionLength = 400;
-
             double _currentSectionPeak;
             double _currentSectionEnd;
 
             std::vector<double> _strainPeaks;
 
         public:
+            const double DECAY_WEIGHT = 0.9;
+            const int SECTION_LENGTH = 400;
+            
             double DifficultyValue() override;
 
         protected: 

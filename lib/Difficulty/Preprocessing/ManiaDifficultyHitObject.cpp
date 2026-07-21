@@ -1,8 +1,7 @@
 #include "Difficulty/Preprocessing/ManiaDifficultyHitObject.hpp"
 #include "Difficulty/Preprocessing/DifficultyHitObject.hpp"
-#include "Generation/Objects.hpp"
+#include "Generation/dotosu.hpp"
 #include <vector>
-#include <memory>
 
 using namespace eppyphany::Generation;
 
@@ -17,7 +16,7 @@ namespace eppyphany::Difficulty {
     {
         this->Column = hitObject.Column; 
 
-        this->ColumnDelta = prevOverall != nullptr ? hitObject.HitTime - prevOverall->Start : 0;
+        this->ColumnDelta = prevOverall != nullptr ? hitObject.HitTime - prevOverall->Start : 0.0;
 
         this->PreviousHitObjects.resize(columnCount, nullptr);
         
@@ -28,10 +27,11 @@ namespace eppyphany::Difficulty {
 
         this->ColumnStrainTime = prevInColumn ? (this->Start - prevInColumn->Start) : this->Start;
 
-        if (index > 0) {
-            if (prevOverall) {
-                this->PreviousHitObjects = prevOverall->PreviousHitObjects;
-                this->PreviousHitObjects[prevOverall->Column] = prevOverall;
+        if (index > 0 && prevOverall) {
+            this->PreviousHitObjects = prevOverall->PreviousHitObjects;
+            int prevColIndex = prevOverall->Column - 1;
+            if (prevColIndex >= 0 && prevColIndex < columnCount) {
+                this->PreviousHitObjects[prevColIndex] = prevOverall;
             }
         }
     }

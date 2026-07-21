@@ -18,7 +18,5 @@ namespace eppyphany::Difficulty {
         protected:
             virtual std::vector<std::unique_ptr<Skill>> CreateSkills(const dotosu& osuFile) = 0;
             virtual std::vector<std::unique_ptr<DifficultyHitObject>> CreateDifficultyHitObjects(const dotosu& osuFile);
-
-            virtual void SortObjects(std::vector<std::unique_ptr<DifficultyHitObject>>& objects);
     };
 }

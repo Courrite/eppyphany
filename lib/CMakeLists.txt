@@ -1,2 +1,3 @@
-add_subdirectory(Generation)
 add_subdirectory(Difficulty)
+add_subdirectory(Generation)
+add_subdirectory(DSP)
