@@ -28,16 +28,13 @@ namespace eppyphany::DSP {
     class Analyzer {
         public:
             Analyzer(int fftSize, int hopSize);
-            ~Analyzer();
 
             std::vector<AudioFrame> Analyze(const Audio& audio);
             
         private:
-            kiss_fftr_cfg fftPlan_;
             int fftSize_;
             double hopSize_;
 
-            std::vector<std::complex<double>> _computeFFT(const std::vector<double>& frame);
             std::vector<double> _magnitude(const std::vector<std::complex<double>>& fft);
             std::vector<double> _computeChroma(const std::vector<double>& mag, double sampleRate);
             double _calculateSpectralFlux(const std::vector<double>& cur, const std::vector<double>& prev);

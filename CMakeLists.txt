@@ -18,9 +18,10 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 add_subdirectory(lib)
 
 target_link_libraries(eppyphany_engine PRIVATE
-    eppyphany_dsp
     eppyphany_gen
+    eppyphany_dsp
     eppyphany_diff
+    eppyphany_utils
 
     avformat
     avcodec

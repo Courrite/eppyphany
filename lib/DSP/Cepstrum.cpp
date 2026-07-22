@@ -3,6 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <complex>
+#include <iostream>
 
 extern "C" {
     #include <kissfft/kiss_fft.h>
@@ -12,6 +13,11 @@ namespace eppyphany::DSP {
     Cepstrum::Cepstrum(int n) : n_(n) {
         cfgForward_ = kiss_fft_alloc(n, 0, nullptr, nullptr);
         cfgInverse_ = kiss_fft_alloc(n, 1, nullptr, nullptr);
+
+        fftPlan_ = kiss_fft_alloc(n_, /*inverse_fft=*/0, nullptr, nullptr);
+        if (!fftPlan_) {
+            std::cerr << "kiss_fftr_alloc failed for fftSize=" << n_ << "\n";
+        }
         
         fftIn_.resize(n);
         fftOut_.resize(n);
@@ -23,6 +29,32 @@ namespace eppyphany::DSP {
     Cepstrum::~Cepstrum() {
         kiss_fft_free(cfgForward_);
         kiss_fft_free(cfgInverse_);
+        kiss_fft_free(fftPlan_);
+    }
+
+    std::vector<std::complex<double>> Cepstrum::ComputeFFT(const std::vector<double>& frame) {
+        int binCount = n_ / 2 + 1;
+
+        if (!fftPlan_ || frame.size() != n_) {
+            return std::vector<std::complex<double>>(binCount, 0.0);
+        }
+
+        for (int i = 0; i < n_; ++i) {
+            fftIn_[i] = {frame[i], 0.0};
+        }
+
+        kiss_fft(
+            fftPlan_, 
+            reinterpret_cast<const kiss_fft_cpx*>(fftIn_.data()), 
+            reinterpret_cast<kiss_fft_cpx*>(fftOut_.data())
+        );
+
+        std::vector<std::complex<double>> output(binCount);
+        for (int i = 0; i < binCount; ++i) {
+            output[i] = fftOut_[i];
+        }
+
+        return output;
     }
 
     void Cepstrum::Forward(const std::vector<double>& timeIn, std::vector<double>& CepstrumOut) {

@@ -19,31 +19,7 @@ namespace eppyphany::DSP {
             std::cerr << "FFT size must be even for a real-input FFT, rounding " << fftSize_ << " down to " << (fftSize_ - 1) << ".\n";
             fftSize_ -= 1;
         }
-        fftPlan_ = kiss_fftr_alloc(fftSize_, /*inverse_fft=*/0, nullptr, nullptr);
-        if (!fftPlan_) {
-            std::cerr << "kiss_fftr_alloc failed for fftSize=" << fftSize_ << "\n";
-        }
     };
-
-    Analyzer::~Analyzer() {
-        if (fftPlan_) {
-            kiss_fftr_free(fftPlan_);
-        }
-    }
-
-    std::vector<std::complex<double>> Analyzer::_computeFFT(const std::vector<double>& frame) {
-        int binCount = fftSize_ / 2 + 1;
-    
-        if (!fftPlan_ || frame.size() != fftSize_) {
-            return std::vector<std::complex<double>>(binCount, 0.0);
-        }
-
-        std::vector<std::complex<double>> output(binCount);
-
-        kiss_fftr(fftPlan_, frame.data(), reinterpret_cast<kiss_fft_cpx*>(output.data()));
-
-        return output;
-    }
 
     std::vector<double> Analyzer::_magnitude(const std::vector<std::complex<double>>& fft) {
         std::vector<double> mag(fft.size());
@@ -103,7 +79,7 @@ namespace eppyphany::DSP {
 
             ceps.ApplyHannWindow(frame);
             
-            auto fftData = _computeFFT(frame);
+            auto fftData = ceps.ComputeFFT(frame);
             auto mag = _magnitude(fftData);
             auto chroma = _computeChroma(mag, audio.SampleRate);
 

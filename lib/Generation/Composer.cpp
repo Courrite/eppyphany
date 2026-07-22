@@ -113,14 +113,18 @@ namespace eppyphany::Generation {
         auto mixCandidates = _pickOnsets(mixTimeline, 0);
         pool.insert(pool.end(), mixCandidates.begin(), mixCandidates.end());
 
-        Audio isolated = separator_.Isolate(audio, 80.0, 1200.0, 2.0);
-        auto isolatedTimeline = analyzer_.Analyze(isolated);
-        auto isolatedCandidates = _pickOnsets(isolatedTimeline, 1);
-        pool.insert(pool.end(), isolatedCandidates.begin(), isolatedCandidates.end());
+        std::vector<Audio> stems = separator_.Isolate(audio, 80.0, 1200.0, 2.0);
 
-        // NOTE: stem 0 (raw mix) and stem 1 (isolated) overlap
+        for (size_t s = 0; s < stems.size(); ++s) {
+            auto stemTimeline = analyzer_.Analyze(stems[s]);
+            auto stemCandidates = _pickOnsets(stemTimeline, static_cast<int>(s + 1));
+            pool.insert(pool.end(), stemCandidates.begin(), stemCandidates.end());
+        }
 
-        std::sort(pool.begin(), pool.end(), [](const auto& a, const auto& b) { return a.TimestampMs < b.TimestampMs; });
+        std::sort(pool.begin(), pool.end(), [](const auto& a, const auto& b) { 
+            return a.TimestampMs < b.TimestampMs; 
+        });
+
         return pool;
     }
 
